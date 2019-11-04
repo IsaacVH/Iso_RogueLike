@@ -10,15 +10,12 @@ public class ThirdPersonController : MonoBehaviour
     public float JumpPower = 10;
     public float GroundLevel = 0;
 
-    // The transform (position and rotation) of the camera
-    public Transform Camera;
-
     // The attached rigidbody of the player
     private Rigidbody rb;
 
 
     // Variables to hold movement information
-    private bool isTouching = true;
+    private bool isTouching = false;
     private float moveX;
     private float moveZ;
     private Vector3 moveVector = new Vector3(0f, 0f, 0f);
@@ -33,6 +30,11 @@ public class ThirdPersonController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Keep player above the "GroundLevel" position, to prevent falling endlessly...
+        if (transform.position.y < GroundLevel)
+        {
+            transform.position = new Vector3(rb.position.x, GroundLevel, rb.position.z);
+        }
     }
 
     // FixedUpdate is called before the frame, and should be used for physics updates
@@ -46,33 +48,20 @@ public class ThirdPersonController : MonoBehaviour
         // Execute transforms
         if (rb != null)
         {
-            // Keep player above the "GroundLevel" position, to prevent falling endlessly...
-            if (rb.position.y < GroundLevel)
-            {
-                rb.position = new Vector3(rb.position.x, GroundLevel, rb.position.z);
-            }
+            rb.AddForce(moveVector * MoveSpeed, ForceMode.Acceleration);
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, TopSpeed);
 
-            // If velocity of player is below our "TopSpeed", then apply movement force, otherwise don't
-            if (rb.velocity.magnitude < TopSpeed)
+            if (moveX != 0f || moveZ != 0f)
             {
-                rb.AddForce(moveVector * MoveSpeed, ForceMode.Acceleration);
-
-                if (moveX != 0f || moveZ != 0f)
-                {
-                    var lookRotation = Quaternion.LookRotation(new Vector3(moveX, 0f, moveZ), Vector3.up);
-                    var rotation = Quaternion.Lerp(rb.transform.rotation, lookRotation, Time.deltaTime * 10);
-                    rb.transform.rotation = rotation;
-                }
-            }
-            else
-            {
-                rb.velocity = Vector3.ClampMagnitude(rb.velocity, TopSpeed);
+                var lookRotation = Quaternion.LookRotation(new Vector3(moveX, 0f, moveZ), Vector3.up);
+                var rotation = Quaternion.Lerp(rb.transform.rotation, lookRotation, Time.deltaTime * 10);
+                rb.transform.rotation = rotation;
             }
 
             // Apply "JumpPower" as an upward force on the rigidbody
             if (isTouching && Input.GetKeyDown("space"))
             {
-                rb.AddForce(Vector3.up * JumpPower, ForceMode.Acceleration);
+                rb.AddForce(Vector3.up * JumpPower, ForceMode.Impulse);
             }
         }
     }

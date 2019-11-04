@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public string FilePath = "/Map/Rooms/room1.room";
+    public string FilePath = "/Scripts/Map/Rooms/room1.room";
     public GameObject[] RoomPrefabs;
     public Material[] TileMaterials;
 
@@ -91,12 +91,12 @@ public class MapGenerator : MonoBehaviour
                 case 0:
                     newTile = Instantiate(RoomPrefabs[tileType], Vector3.zero, Quaternion.identity);
                     startingHeightPosition = 10f;
-                    finalHeightPosition = 0f;
+                    finalHeightPosition = 0.5f;
                     break;
                 case 3:
                     newTile = Instantiate(RoomPrefabs[tileType], Vector3.zero, Quaternion.identity);
                     startingHeightPosition = 9f;
-                    finalHeightPosition = -1f;
+                    finalHeightPosition = -0.5f;
                     break;
                 default:
                     // make the new quad a child of this GameObject, and rotate around x axis by 90 degrees
